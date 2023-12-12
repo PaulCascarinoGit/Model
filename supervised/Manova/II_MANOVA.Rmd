@@ -118,6 +118,7 @@ rm(list=ls())
 
 ```{r}
 library(kableExtra)
+library(help = "datasets")
 ```
 *  **Première étape :**
 ```{r}
@@ -458,66 +459,71 @@ Nous testons cette fonction avec le fichier *iris* fourni par defaut dans R
 Cette fonction nous servira au prochain TD lorsque nous réaliserons une analyse factorielle discriminante
 
 ```{r}
-my_manova <- function(X, Y) {
-  final <- list()
+  my_manova <- function(X, Y) {
+    final <- list()
 
-  final$N <- nrow(X)
-  final$P <- ncol(X) - 1
+    final$N <- nrow(X)
+    final$P <- ncol(X) - 1
 
-  K <- length(levels(Y))
-  XK <- split(X, Y)
-  final$NK <- table(Y)
+    K <- length(levels(Y))
+    XK <- split(X, Y)
+    final$NK <- table(Y)
 
-  final$GK <- lapply(XK, colMeans)
+    final$GK <- lapply(XK, colMeans)
 
-  final$G <- lapply(X, mean)
+    final$G <- lapply(X, mean)
 
-  # Transformer le dataframe en matrice (NxP)
-  X_matrix <- as.matrix(X)
-  G_tot <- matrix(rep(as.numeric(final$G), final$N),
-                  nrow = final$N,
-                  ncol = final$P,
-                  byrow = TRUE)
-  Diff_matrix <- X_matrix - G_tot
-  final$SS_tot <- t(Diff_matrix) %*% Diff_matrix
+    # Transformer le dataframe en matrice (NxP)
+    X_matrix <- X
+    X_matrix <- as.matrix(X_matrix)
+    G_tot <- matrix(rep(as.numeric(final$G), final$N),
+                    nrow = nrow(X_matrix),
+                    byrow = TRUE)
+    Diff_matrix <- X_matrix - G_tot
+    final$SS_tot <- t(Diff_matrix) %*% Diff_matrix
 
-  SS_tot_intra <- list()
-  for (key in names(XK)) {
-    XK_matrix <- as.matrix(XK[[key]])
-    GK_matrix <- matrix(rep(as.numeric(final$GK[[key]]),
-                            nrow(XK_matrix)),
-                        nrow = nrow(XK_matrix),
-                        byrow = TRUE)
-    # Calcul de la différence et stockage dans la liste
-    Diff_matrix_inter <- XK_matrix - GK_matrix
-    SS_tot_intra[[key]] <- t(Diff_matrix_inter) %*% Diff_matrix_inter
+    SS_tot_intra <- list()
+    for (key in names(XK)) {
+      XK_matrix <- as.matrix(XK[[key]])
+      GK_matrix <- matrix(rep(as.numeric(final$GK[[key]]),
+                              nrow(XK_matrix)),
+                          nrow = nrow(XK_matrix),
+                          byrow = TRUE)
+      # Calcul de la différence et stockage dans la liste
+      Diff_matrix_inter <- XK_matrix - GK_matrix
+      SS_tot_intra[[key]] <- t(Diff_matrix_inter) %*% Diff_matrix_inter
+    }
+    final$SS_intra <- Reduce(`+`, SS_tot_intra)
+
+    final$SS_inter <- final$SS_tot - final$SS_intra
+
+    final$lambda <- det(final$SS_intra) / (det(final$SS_inter + final$SS_intra))
+
+    correction <- -(final$N - 1 - (final$P + final$K)/2) * log(final$lambda)
+    ddl <- 15
+    final$proba <- 1 - pchisq(correction, ddl)
+
+    return(final)
   }
-  final$SS_intra <- Reduce(`+`, SS_tot_intra)
+  ```
+  Le jeux de données est le suivant
 
-  final$SS_inter <- final$SS_tot - final$SS_intra
+  ```{r}
+  test <- my_manova(X,Y)
+  test
+  ```
 
-  final$lambda <- det(final$SS_intra) / (det(final$SS_inter + final$SS_intra))
+  ```{r, echo = T}
+  # Avec iris
+  #Chargement du datasetx
+  iris_df <- iris
+  head(iris_df)
 
-  correction <- -(final$N - 1 - (final$P + final$K)/2) * log(final$lambda)
-  ddl <- 15
-  final$proba <- 1 - pchisq(correction, ddl)
-
-  return(final)
-}
-
-# Exemple d'utilisation
-test <- my_manova(X, Y)
-print(test)
-```
-Le jeux de données est le suivant
-
-```{r}
-test <- my_manova(X,Y)
-test
-```
-
-```{r, echo = T}
-# à compléter
+  Y_iris <- iris_df$Species
+  X_iris <- subset(iris_df, select = -c(Species))
+  
+  test_iris <- my_manova(X_iris,Y_iris)
+  test_iris
 ```
 
 <br>
@@ -527,6 +533,7 @@ l'utilisation de la fonction *manova* de R conduit à la même valeur du lambda.
 Une fois de plus, vous avez bien travaillé !
 
 ```{r, echo = T}
-# à compléter
+manova_res <- manova(cbind(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width) ~ Y, data = X)
+summary(manova_res)
 ```
 
