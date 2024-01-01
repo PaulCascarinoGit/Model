@@ -1,0 +1,61 @@
+---
+title: "Classification Bayésienne"
+output:
+  html_document:
+    theme: readable
+    toc: yes
+    toc_depth: 6
+    toc_float: yes
+author: "Paul Cascarino et"
+date: "Décembre 2023"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Projet 1 : 
+
+## 1. Introduction
+### Les objectifs du projet
+
+## 2. Chargement et exploration des données
+### Préparation et impors
+Dans un premier temps, nous effaçons la mémoire : 
+```{r}
+rm(list=ls())
+```
+Et faire les imports nécessaire
+
+### Chargement des données
+Les données sont récupérés sur le site kaggle à l'adresse : <https://www.kaggle.com/datasets/abdallahwagih/emotion-dataset>
+Nous pouvons ainsi récupérer le csv récupéré avec : 
+```{r}
+df <- read.csv('data/Emotion_classify_Data.csv')
+```
+Voici un aperçu de nos données : 
+```{r}
+head(df)
+```
+
+
+### Pourquoi l'utilisation de Naive Bayésienne
+
+
+## 3. Prétraitement des données
+### Pourquoi ce feature engineering ?
+
+## 4. Entrainement du modèle Bayésienne
+
+## 5. Evaluation du modèle
+### Les résultats
+### Les mesures d'évaluation du modèle
+### Les validations croisées effectuées 
+
+## 6. Amélioration et optimisation
+### Discussion des défis rencontrés
+### Raison de la performance du modèle
+### Amélioration
+
+## 7. Conclusion et travaux à venir
+### Conclusion
+### Améliorations possibles
